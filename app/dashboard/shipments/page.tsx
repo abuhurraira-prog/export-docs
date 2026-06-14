@@ -49,6 +49,7 @@ export default async function ShipmentsPage() {
                 <th className="px-4 py-2 text-left">Invoice</th>
                 <th className="px-4 py-2 text-left">Packing</th>
                 <th className="px-4 py-2 text-left">COO</th>
+                <th className="px-4 py-2 text-left">B/L</th>
                 <th className="px-4 py-2 text-left">Date</th>
               </tr>
             </thead>
@@ -68,6 +69,9 @@ export default async function ShipmentsPage() {
                   <td className="px-4 py-2">
                     <a href={`/api/documents/coo/${shipment.id}`} target="_blank" className="text-blue-600 underline">PDF</a>
                   </td>
+<td className="px-4 py-2">
+  <a href={`/api/documents/bol/${shipment.id}`} target="_blank" className="text-blue-600 underline">PDF</a>
+</td>
                   <td className="px-4 py-2">{new Date(shipment.shipmentDate).toLocaleDateString()}</td>
                 </tr>
               ))}
