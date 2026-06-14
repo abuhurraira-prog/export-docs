@@ -1,17 +1,18 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 
 export default async function NewBuyerPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
   async function createBuyer(formData: FormData) {
     "use server";
-    const { userId: clerkUserId, user: clerkUser } = await auth();
+    const { userId: clerkUserId } = await auth();
+    const clerkUser = await currentUser();
     if (!clerkUserId) throw new Error("Unauthorized");
 
-    // 1. Upsert user by clerkId, get internal database user record
     const dbUser = await prisma.user.upsert({
       where: { clerkId: clerkUserId },
       update: {
@@ -25,7 +26,6 @@ export default async function NewBuyerPage() {
       },
     });
 
-    // 2. Get form data
     const companyName = formData.get("companyName") as string;
     const contactPerson = formData.get("contactPerson") as string;
     const email = formData.get("email") as string;
@@ -36,7 +36,6 @@ export default async function NewBuyerPage() {
     const postalCode = formData.get("postalCode") as string;
     const vatNumber = formData.get("vatNumber") as string;
 
-    // 3. Create buyer using internal user ID
     await prisma.buyer.create({
       data: {
         userId: dbUser.id,
@@ -52,7 +51,6 @@ export default async function NewBuyerPage() {
       },
     });
 
-    // 4. Redirect (will throw NEXT_REDIRECT, which is expected)
     redirect("/dashboard/buyers");
   }
 

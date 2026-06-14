@@ -1,10 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import Link from "next/link";
 
 export default async function ShipmentsPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
   const dbUser = await prisma.user.upsert({
@@ -34,7 +35,6 @@ export default async function ShipmentsPage() {
           + New Shipment
         </Link>
       </div>
-
       {shipments.length === 0 ? (
         <p className="text-gray-500">No shipments yet. Click "New Shipment" to create one.</p>
       ) : (
@@ -46,9 +46,9 @@ export default async function ShipmentsPage() {
                 <th className="px-4 py-2 text-left">Buyer</th>
                 <th className="px-4 py-2 text-right">Total (USD)</th>
                 <th className="px-4 py-2 text-left">Status</th>
-<th className="px-4 py-2 text-left">Invoice</th>
-<th className="px-4 py-2 text-left">Packing</th>
-<th className="px-4 py-2 text-left">COO</th>
+                <th className="px-4 py-2 text-left">Invoice</th>
+                <th className="px-4 py-2 text-left">Packing</th>
+                <th className="px-4 py-2 text-left">COO</th>
                 <th className="px-4 py-2 text-left">Date</th>
               </tr>
             </thead>
@@ -59,21 +59,15 @@ export default async function ShipmentsPage() {
                   <td className="px-4 py-2">{shipment.buyer.companyName}</td>
                   <td className="px-4 py-2 text-right">{shipment.totalAmount}</td>
                   <td className="px-4 py-2">{shipment.status}</td>
-<td className="px-4 py-2">
-  <a href={`/api/documents/invoice/${shipment.id}`} target="_blank" className="text-blue-600 underline">
-    PDF
-  </a>
-</td>
-<td className="px-4 py-2">
-  <a href={`/api/documents/packinglist/${shipment.id}`} target="_blank" className="text-blue-600 underline">
-    PDF
-  </a>
-</td>
-<td className="px-4 py-2">
-  <a href={`/api/documents/coo/${shipment.id}`} target="_blank" className="text-blue-600 underline">
-    PDF
-  </a>
-</td>
+                  <td className="px-4 py-2">
+                    <a href={`/api/documents/invoice/${shipment.id}`} target="_blank" className="text-blue-600 underline">PDF</a>
+                  </td>
+                  <td className="px-4 py-2">
+                    <a href={`/api/documents/packinglist/${shipment.id}`} target="_blank" className="text-blue-600 underline">PDF</a>
+                  </td>
+                  <td className="px-4 py-2">
+                    <a href={`/api/documents/coo/${shipment.id}`} target="_blank" className="text-blue-600 underline">PDF</a>
+                  </td>
                   <td className="px-4 py-2">{new Date(shipment.shipmentDate).toLocaleDateString()}</td>
                 </tr>
               ))}

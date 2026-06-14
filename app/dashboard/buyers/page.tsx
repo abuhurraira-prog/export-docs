@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import Link from "next/link";
 
 export default async function BuyersPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
-  // Get the internal database user record (same as in the create form)
   const dbUser = await prisma.user.upsert({
     where: { clerkId: clerkUserId },
     update: {
@@ -21,7 +21,6 @@ export default async function BuyersPage() {
     },
   });
 
-  // Now query using the internal user ID, not the Clerk ID
   const buyers = await prisma.buyer.findMany({
     where: { userId: dbUser.id },
     orderBy: { createdAt: "desc" },
@@ -35,7 +34,6 @@ export default async function BuyersPage() {
           + Add Buyer
         </Link>
       </div>
-
       {buyers.length === 0 ? (
         <p className="text-gray-500">No buyers yet. Click "Add Buyer" to create one.</p>
       ) : (

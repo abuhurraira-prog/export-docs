@@ -1,10 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import ShipmentForm from "@/components/ShipmentForm";
 
 export default async function NewShipmentPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
   const dbUser = await prisma.user.upsert({

@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 import Link from "next/link";
 
 export default async function ProductsPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
-  // Get internal user ID
   const dbUser = await prisma.user.upsert({
     where: { clerkId: clerkUserId },
     update: {
@@ -34,7 +34,6 @@ export default async function ProductsPage() {
           + Add Product
         </Link>
       </div>
-
       {products.length === 0 ? (
         <p className="text-gray-500">No products yet. Click "Add Product" to create one.</p>
       ) : (

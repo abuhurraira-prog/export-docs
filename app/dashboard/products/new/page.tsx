@@ -1,17 +1,18 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/client";
 
 export default async function NewProductPage() {
-  const { userId: clerkUserId, user: clerkUser } = await auth();
+  const { userId: clerkUserId } = await auth();
+  const clerkUser = await currentUser();
   if (!clerkUserId) redirect("/sign-in");
 
   async function createProduct(formData: FormData) {
     "use server";
-    const { userId: clerkUserId, user: clerkUser } = await auth();
+    const { userId: clerkUserId } = await auth();
+    const clerkUser = await currentUser();
     if (!clerkUserId) throw new Error("Unauthorized");
 
-    // Get internal user ID
     const dbUser = await prisma.user.upsert({
       where: { clerkId: clerkUserId },
       update: {
